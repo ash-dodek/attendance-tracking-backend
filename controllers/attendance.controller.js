@@ -31,8 +31,6 @@ const addStudentAttendance = async (req, res) => {
     }
 
     if(subjectIsThere && student.attendance != []){
-        console.log(`Subject is ${subjectObj}`)
-
         subjectObj.records.push({
             date: getTodayDate(),
             status: status
