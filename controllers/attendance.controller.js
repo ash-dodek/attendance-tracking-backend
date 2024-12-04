@@ -19,7 +19,7 @@ const addStudentAttendance = async (req, res) => {
     const student = await Student.findOne({ email });
 
     let subjectIsThere = false
-    let subjectObj;//will use this object to push final data
+    let subjectObj;//will push data(attendance in the records field) using this object
     for(let subjectObject of student.attendance){
         if(subjectObject.subject === subject){
             subjectIsThere = true
@@ -50,12 +50,8 @@ const addStudentAttendance = async (req, res) => {
     }
 
     const updatedStudent = await student.save()
-    // if (!updatedStudent) {
-    //     return res.status(404).json({ message: "Student not found." });
-    // }
 
     res.status(200).json(updatedStudent)
-
 }
 
 module.exports = addStudentAttendance
