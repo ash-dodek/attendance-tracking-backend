@@ -1,4 +1,5 @@
 const Student = require("../models/student.model")
+const jwt = require('jsonwebtoken')
 
 const getTodayDate = () => {
     let today = new Date()
@@ -52,4 +53,86 @@ const addStudentAttendance = async (req, res) => {
     res.status(200).json(updatedStudent)
 }
 
-module.exports = addStudentAttendance
+const findSubjectAttendance = async (req, res) => {
+    try{
+
+        const {email, subject} = req.body
+        const token = req.cookie.refreshToken
+        const foundStudent = await Student.findOne({email})
+        if(!foundStudent){
+            return res.status(400).json({message: "Student not found"})
+        }
+
+        for (const subjectObject of foundStudent.attendance) {
+            if(subjectObject.subject === subject){
+                return res.status(200).json(subjectObject.records)
+                //subjectObject.records return an array [] to be decoded at frontend
+            }
+        }
+        
+        return res.status(400).json({message: "Subject not found"})
+
+    }catch(error){
+        console.log(error)
+        res.status(400).json({message: "Internal server error"})
+    }
+
+}
+
+
+const addSubject = async (req, res) => {
+    const {subject} = req.body
+    const token = req.cookies.refreshToken
+
+    try{
+
+        const decoded = jwt.decode(token, {complete:true})
+        const foundStudent = await Student.findOne({_id:decoded.payload.userId})
+
+        if(foundStudent.attendance){
+        }
+        for (const subjectObj of foundStudent.attendance) {
+            if(subjectObj.subject === subject){
+                return res.status(400).json({message: "Subject already exists"})
+            }
+        }
+
+        foundStudent.attendance.push({
+            subject: subject,
+            records: [],
+        })
+
+        foundStudent.save()
+        return res.status(200).json({message: `Subject ${subject} added`})
+
+    }catch(error){
+        console.log(error)
+        res.status(400).json({message: "Internal server error"})
+    }
+}
+
+const removeSubject = async (req, res) => {
+    const {subject} = req.body
+    const token = req.cookies.refreshToken
+
+    try{
+
+        const decoded = jwt.decode(token, {complete:true})
+        const foundStudent = await Student.findOne({_id:decoded.payload.userId})
+
+        for (const subjectObj of foundStudent.attendance) {
+            if(subjectObj.subject === subject){
+                foundStudent.attendance.pull(subjectObj)
+                foundStudent.save()
+                return res.status(200).json({message: `Subject ${subject} removed`})
+            }
+        }
+
+        return res.status(400).json({message: "Subject not found"})
+
+    }catch(error){
+        console.log(error)
+        res.status(400).json({message: "Internal server error"})
+    }
+}
+module.exports = {addStudentAttendance, findSubjectAttendance, addSubject, removeSubject}

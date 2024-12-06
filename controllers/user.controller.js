@@ -88,4 +88,10 @@ const refreshesAccessToken = (req, res) => {
         res.json({accessToken: newAccessToken})
     })
 }
-module.exports = {registerUser, loginUser, refreshesAccessToken}
+
+const logoutUser = async(req, res) => {
+    res.clearCookie('refreshToken')
+    res.status(200).json({message: "Logged out"})
+}
+
+module.exports = {registerUser, loginUser, refreshesAccessToken, logoutUser}
