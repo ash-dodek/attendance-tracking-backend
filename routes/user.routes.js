@@ -9,6 +9,12 @@ router.post('/login', userController.loginUser)
 
 router.get('/refresh', userController.refreshesAccessToken)
 
-router.get('/logout', userController.logoutUser)
+router.post('/logout', userController.logoutUser)
+
+router.get('/isLogged', userController.authenticateUser)
+
+router.get('/refresh', userController.refreshesAccessToken)
+
+router.get('/verify', userController.verifyAccessToken)
 
 module.exports = router

@@ -9,7 +9,12 @@ require('dotenv').config()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
-app.use(cors())
+app.use(
+    cors({
+        origin: 'http://localhost:5173', // Allow frontend origin
+        credentials: true, // Allow cookies to be sent
+    })
+)
 
 app.get('/', (req, res) => {
     res.json({message: "We Up"})

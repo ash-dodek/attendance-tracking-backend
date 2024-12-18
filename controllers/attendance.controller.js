@@ -7,17 +7,30 @@ const getTodayDate = () => {
     let mm = String(today.getMonth() + 1).padStart(2, '0')
     let yyyy = today.getFullYear()
 
-    today = mm + '/' + dd + '/' + yyyy
+    today = yyyy + '/' + mm + '/' + dd
     return today
 }
 
+const getSubjects = async (req, res) => {
+    const {userId} = req.body
+    const student = await Student.findOne({_id: userId})
+    if(!student){
+        return res.status(400).json({message: "Student not found"})
+    }
+    return res.status(200).json(student.attendance)
+}
+
 const addStudentAttendance = async (req, res) => {
-    const {email, status, subject} = req.body
-    if (!email || !subject || !status) {
+    const {userId, status, subject, date} = req.body
+    if (!userId || !subject|| status === null || !date) {
         return res.status(400).json({ message: "Insufficient information provided" });
     }
 
-    const student = await Student.findOne({ email });
+    const student = await Student.findOne({ _id:userId });
+
+    if(student === null){
+        return res.status(400).json({message: "Student not found with that id"})
+    }
 
     let subjectIsThere = false
     let subjectObj;//will push data(attendance in the records field) using this object
@@ -25,15 +38,17 @@ const addStudentAttendance = async (req, res) => {
         if(subjectObject.subject === subject){
             subjectIsThere = true
             subjectObj = subjectObject
+            break;
         }
         else{
             subjectIsThere = false
         }
     }
 
+
     if(subjectIsThere && student.attendance != []){
         subjectObj.records.push({
-            date: getTodayDate(),
+            date: date, //yyyy/mm/dd
             status: status
         })
     }
@@ -42,7 +57,7 @@ const addStudentAttendance = async (req, res) => {
         student.attendance.push({
             subject: subject,
             records:[{
-                date: getTodayDate(),
+                date: date, //yyyy/mm/dd
                 status: status
             }]
         })
@@ -50,15 +65,23 @@ const addStudentAttendance = async (req, res) => {
 
     const updatedStudent = await student.save()
 
-    res.status(200).json(updatedStudent)
+    for (const subjectObject of updatedStudent.attendance) {
+        if(subjectObject.subject === subject){
+            return res.status(200).json(subjectObject.records)
+        }
+    }
+
+    res.status(500).json({message: "You encountered a rare bug, code: 100"})
 }
 
 const findSubjectAttendance = async (req, res) => {
     try{
 
-        const {email, subject} = req.body
-        const token = req.cookie.refreshToken
-        const foundStudent = await Student.findOne({email})
+        const {subject, userId} = req.body
+        if(!userId || !subject){
+            return res.status(400).json({message:"Insufficient Details provided"})
+        }
+        const foundStudent = await Student.findOne({_id:userId})
         if(!foundStudent){
             return res.status(400).json({message: "Student not found"})
         }
@@ -74,20 +97,21 @@ const findSubjectAttendance = async (req, res) => {
 
     }catch(error){
         console.log(error)
-        res.status(400).json({message: "Internal server error"})
+        res.status(500).json({message: "Internal server error"})
     }
 
 }
 
 
 const addSubject = async (req, res) => {
-    const {subject} = req.body
-    const token = req.cookies.refreshToken
+    const {userId, subject, days} = req.body
+    // days will be an array telling on which days the classes will be 
+    // const token = req.cookies.refreshToken
 
     try{
 
-        const decoded = jwt.decode(token, {complete:true})
-        const foundStudent = await Student.findOne({_id:decoded.payload.userId})
+        // const decoded = jwt.decode(token, {complete:true})
+        const foundStudent = await Student.findOne({_id:userId})
 
         if(foundStudent.attendance){
         }
@@ -99,8 +123,11 @@ const addSubject = async (req, res) => {
 
         foundStudent.attendance.push({
             subject: subject,
+            days: days,
             records: [],
         })
+        
+        console.log(foundStudent.attendance)
 
         foundStudent.save()
         return res.status(200).json({message: `Subject ${subject} added`})
@@ -135,4 +162,4 @@ const removeSubject = async (req, res) => {
         res.status(400).json({message: "Internal server error"})
     }
 }
-module.exports = {addStudentAttendance, findSubjectAttendance, addSubject, removeSubject}
+module.exports = {addStudentAttendance, findSubjectAttendance, addSubject, removeSubject, getSubjects}

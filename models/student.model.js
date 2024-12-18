@@ -20,6 +20,9 @@ const attendanceSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    days: {
+        type: Array
+    },
     records: [subjectAttendanceSchema]
 })
 
@@ -29,7 +32,7 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    email:{
+    username:{
         type: String,
         required: true,
         unique: true
@@ -62,7 +65,7 @@ studentSchema.methods.generateAccessToken = async function() {
             process.env.JWT_SECRET_AC,
             { expiresIn: '1h' }
         )
-    }catch(err){
+    }catch(error){
         console.error(error)
     }
 }
@@ -75,7 +78,7 @@ studentSchema.methods.generateRefreshToken = async function() {
             process.env.JWT_SECRET_RF
         )
         
-    }catch(err){
+    }catch(error){
         console.error(error)
     }
 }

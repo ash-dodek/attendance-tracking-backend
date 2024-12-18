@@ -4,9 +4,13 @@ const authenticateRefreshToken = require('../middlewares/authenticateToken')
 const router = express.Router()
 
 
+// /attendance route
+
 router.post('/mark', authenticateRefreshToken, attController.addStudentAttendance)
 
-router.get('/find', authenticateRefreshToken, attController.findSubjectAttendance)
+router.post('/find', authenticateRefreshToken, attController.findSubjectAttendance)
+
+router.get('/subjects', authenticateRefreshToken, attController.getSubjects)
 
 router.post('/subject/add', authenticateRefreshToken, attController.addSubject)
 
