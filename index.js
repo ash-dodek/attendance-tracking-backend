@@ -43,7 +43,7 @@ app.use('/attendance', require('./routes/attendance.routes'))
 
 mongoose.connect(`mongodb+srv://sampleBase:${process.env.DB_CONNECTION_PASSWORD}@cluster0.oqumgie.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`)
 .then(() => {
-    app.listen(process.env.PORT, process.env.HOSTNAME,() => {
-        console.log(`Connected to the database and server running at http://localhost:${process.env.PORT}/ \n`)
+    app.listen(PORT, process.env.HOSTNAME,() => {
+        console.log(`Connected to the database and server running at http://localhost:${PORT}/ \n`)
     })
 })
