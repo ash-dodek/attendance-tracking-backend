@@ -12,7 +12,8 @@ const registerUser = async (req, res) => {
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            sameSite: 'strict',
+            sameSite: 'None',
+            secure: true,
             maxAge: 365 * 24 * 60 * 60 * 1000
         })// we set the refreshTOken in the cookie which is set to httpOnly(only accessible by backend)
         // res.header('Access-Control-Allow-Credentials', 'true');
@@ -52,7 +53,8 @@ const loginUser = async (req, res) => {
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                sameSite: 'strict',
+                sameSite: 'None',
+                secure: true,
                 maxAge: 365 * 24 * 60 * 60 * 1000
             })
 
