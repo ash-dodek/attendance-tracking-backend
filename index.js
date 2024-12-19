@@ -9,12 +9,28 @@ require('dotenv').config()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
-app.use(
-    cors({
-        origin: 'http://localhost:5173', // Allow frontend origin
-        credentials: true, // Allow cookies to be sent
-    })
-)
+
+const allowedOrigins = process.env.ORIGIN.split(',')
+try {
+    
+    const corsOptions = {
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS, request from ' + origin));
+            }
+        },
+        credentials: true,
+    };
+    app.use(
+        cors(corsOptions)
+    )
+} catch (error) {
+    console.log(error.message)
+}
+
+
 
 app.get('/', (req, res) => {
     res.json({message: "We Up"})

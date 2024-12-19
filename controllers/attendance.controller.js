@@ -21,57 +21,62 @@ const getSubjects = async (req, res) => {
 }
 
 const addStudentAttendance = async (req, res) => {
-    const {userId, status, subject, date} = req.body
-    if (!userId || !subject|| status === null || !date) {
-        return res.status(400).json({ message: "Insufficient information provided" });
-    }
+    try {
 
-    const student = await Student.findOne({ _id:userId });
-
-    if(student === null){
-        return res.status(400).json({message: "Student not found with that id"})
-    }
-
-    let subjectIsThere = false
-    let subjectObj;//will push data(attendance in the records field) using this object
-    for(let subjectObject of student.attendance){
-        if(subjectObject.subject === subject){
-            subjectIsThere = true
-            subjectObj = subjectObject
-            break;
+        const {userId, status, subject, date} = req.body
+        if (!userId || !subject|| status === null || !date) {
+            return res.status(400).json({ message: "Insufficient information provided" });
         }
-        else{
-            subjectIsThere = false
+
+        const student = await Student.findOne({ _id:userId });
+
+        if(student === null){
+            return res.status(400).json({message: "Student not found with that id"})
         }
-    }
+
+        let subjectIsThere = false
+        let subjectObj;//will push data(attendance in the records field) using this object
+        for(let subjectObject of student.attendance){
+            if(subjectObject.subject === subject){
+                subjectIsThere = true
+                subjectObj = subjectObject
+                break;
+            }
+            else{
+                subjectIsThere = false
+            }
+        }
 
 
-    if(subjectIsThere && student.attendance != []){
-        subjectObj.records.push({
-            date: date, //yyyy/mm/dd
-            status: status
-        })
-    }
-
-    else if (!subjectIsThere){
-        student.attendance.push({
-            subject: subject,
-            records:[{
+        if(subjectIsThere && student.attendance != []){
+            subjectObj.records.push({
                 date: date, //yyyy/mm/dd
                 status: status
-            }]
-        })
-    }
-
-    const updatedStudent = await student.save()
-
-    for (const subjectObject of updatedStudent.attendance) {
-        if(subjectObject.subject === subject){
-            return res.status(200).json(subjectObject.records)
+            })
         }
-    }
 
-    res.status(500).json({message: "You encountered a rare bug, code: 100"})
+        else if (!subjectIsThere){
+            student.attendance.push({
+                subject: subject,
+                records:[{
+                    date: date, //yyyy/mm/dd
+                    status: status
+                }]
+            })
+        }
+
+        const updatedStudent = await student.save()
+        for (const subjectObject of updatedStudent.attendance) {
+            if(subjectObject.subject === subject){
+                return res.status(200).json(subjectObject.records)
+            }
+        }
+
+        res.status(500).json({message: "You encountered a rare bug, code: 100"})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Internal server error"})
+    }
 }
 
 
@@ -102,8 +107,7 @@ const editSubjectAttendance = async (req, res) => {
                 "record.date": date
             }
         ]
-    }
-)
+    })
 
 
     if(updated === null){
