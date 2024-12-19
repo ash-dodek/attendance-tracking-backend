@@ -74,6 +74,45 @@ const addStudentAttendance = async (req, res) => {
     res.status(500).json({message: "You encountered a rare bug, code: 100"})
 }
 
+
+const editSubjectAttendance = async (req, res) => {
+    //this function is to edit attendance of subject, on a specific day, (change to present if absent or vice versa)
+    const {userId, status, subject, date} = req.body
+    if (!userId || !subject|| status === null || !date) {
+        return res.status(400).json({ message: "Insufficient information provided" });
+    }
+    
+
+    const updated = await Student.updateOne(
+    {
+        "attendance.subject": subject,
+        "attendance.records.date": date
+    },
+    {
+        $set: {
+            "attendance.$[subject].records.$[record].status": status
+        }
+    },
+    {
+        arrayFilters: [
+            {
+                "subject.subject": subject
+            },
+            {
+                "record.date": date
+            }
+        ]
+    }
+)
+
+
+    if(updated === null){
+        return res.status(400).json({message: "Student not found with that id"})
+    }
+    return res.status(200).json(updated)
+}
+
+
 const findSubjectAttendance = async (req, res) => {
     try{
 
@@ -162,4 +201,4 @@ const removeSubject = async (req, res) => {
         res.status(400).json({message: "Internal server error"})
     }
 }
-module.exports = {addStudentAttendance, findSubjectAttendance, addSubject, removeSubject, getSubjects}
+module.exports = {addStudentAttendance, findSubjectAttendance, addSubject, removeSubject, getSubjects, editSubjectAttendance}

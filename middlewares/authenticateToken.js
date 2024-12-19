@@ -13,7 +13,6 @@ const authenticateRefreshToken = async (req, res, next) => {
                 return res.status(401).json({message: "Unauthorized token"})
             }
             req.body.userId = decoded.userId
-            console.log(`===========>refresh token set in the req.body ====> ${req.body.userId}`)
         })
         return next()
     }catch(error){

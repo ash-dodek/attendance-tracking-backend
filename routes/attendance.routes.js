@@ -8,6 +8,8 @@ const router = express.Router()
 
 router.post('/mark', authenticateRefreshToken, attController.addStudentAttendance)
 
+router.post('/edit', authenticateRefreshToken, attController.editSubjectAttendance)
+
 router.post('/find', authenticateRefreshToken, attController.findSubjectAttendance)
 
 router.get('/subjects', authenticateRefreshToken, attController.getSubjects)
