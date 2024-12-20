@@ -97,7 +97,12 @@ const refreshesAccessToken = (req, res) => {
 }
 
 const logoutUser = async(req, res) => {
-    res.clearCookie('refreshToken')
+    const refreshToken = req.cookies.refreshToken
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        sameSite: 'None',
+        secure: true
+    })
     res.status(200).json({message: "Logged out"})
 }
 
