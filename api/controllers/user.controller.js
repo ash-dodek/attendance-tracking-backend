@@ -20,7 +20,7 @@ const registerUser = async (req, res) => {
 
 
         //we will give the accesstoken in json for which further work will be done in the frontend
-        res.status(200).json({accessToken, savedUser})
+        res.status(200).json(savedUser)
 
     } catch (error) {
         if(error.code === 11000){// mongodb return error code 11000 if duplicate key found
@@ -58,10 +58,7 @@ const loginUser = async (req, res) => {
                 maxAge: 365 * 24 * 60 * 60 * 1000
             })
 
-            return res.status(200).json({
-                message: "Logged in",
-                accessToken
-            })
+            return res.status(200).json(userExists)
 
         }
         else{
